@@ -2,92 +2,165 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Apri Link Social</title>
+<meta name="theme-color" content="#0b0d17">
+<meta name="description" content="Apri i link dei social senza avere un account.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>SocialEye</title>
 <style>
   :root {
-    --bg: #f6f7f9; --card: #fff; --text: #1d2330; --muted: #5d6677; --line: #e3e6ec;
-    --accent: #3b5bdb; --ok: #2b8a3e; --warn: #b35c00; --bad: #c92a2a;
+    --bg: #0b0d17; --bg2: #121528; --card: rgba(255,255,255,.06); --card-solid: #161a2e;
+    --line: rgba(255,255,255,.10); --text: #f1f2f8; --muted: #a2a7c2;
+    --g1: #ff5f6d; --g2: #c86dd7; --g3: #4f7cff;
+    --grad: linear-gradient(120deg, var(--g1), var(--g2) 50%, var(--g3));
+    --ok: #4ade80; --warn: #fbbf24; --bad: #f87171;
+    --radius: 22px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #12151b; --card: #1b1f27; --text: #e8ebf1; --muted: #9aa3b3; --line: #2b313c;
-      --accent: #7c95f5; --ok: #69db7c; --warn: #ffa94d; --bad: #ff8787; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f4f5fb; --bg2: #ffffff; --card: rgba(255,255,255,.75); --card-solid: #fff;
+      --line: rgba(20,24,60,.10); --text: #151833; --muted: #5d6385; --ok: #16a34a; --warn: #b45309; --bad: #dc2626; }
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--text); }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 20px; }
-  form { display: flex; gap: 8px; flex-wrap: wrap; }
-  input[type=url] { flex: 1 1 320px; min-width: 0; padding: 12px 14px; font-size: 1rem;
-    border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); }
-  button { padding: 12px 16px; font-size: 1rem; border-radius: 10px; border: 1px solid var(--line);
-    background: var(--card); color: var(--text); cursor: pointer; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-top: 20px; }
-  .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-  .badge { font-size: .8rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
-  .status { font-size: .85rem; font-weight: 600; }
-  .status.ok { color: var(--ok); } .status.warn { color: var(--warn); } .status.bad { color: var(--bad); }
-  .note { color: var(--muted); font-size: .92rem; margin: 6px 0 0; }
-  .frame-wrap { display: flex; justify-content: center; margin-top: 12px; }
-  iframe { border: 0; border-radius: 10px; background: var(--bg); width: 100%; max-width: 100%; }
-  a { color: var(--accent); }
-  .links { margin-top: 12px; font-size: .92rem; }
-  details { margin-top: 28px; }
-  summary { cursor: pointer; font-weight: 600; }
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 10px; }
-  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  .history { margin-top: 24px; }
-  .history h2 { font-size: 1rem; margin: 0 0 6px; }
-  .history ul { list-style: none; padding: 0; margin: 0; }
-  .history li button { width: 100%; text-align: left; margin-top: 6px; padding: 8px 12px; font-size: .88rem;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  footer { margin-top: 36px; color: var(--muted); font-size: .82rem; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--bg); }
+  body { margin: 0; min-height: 100vh; color: var(--text);
+    font: 16px/1.5 ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(900px 500px at 10% -10%, rgba(255,95,109,.22), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(79,124,255,.25), transparent 60%),
+      var(--bg);
+    background-attachment: fixed; }
+  main { max-width: 680px; margin: 0 auto;
+    padding: max(28px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 80px max(18px, env(safe-area-inset-left)); }
+
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+  .brand svg { width: 44px; height: 44px; filter: drop-shadow(0 6px 18px rgba(200,109,215,.45)); }
+  .brand b { font-size: 1.45rem; letter-spacing: -.02em; }
+  .brand b span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  h1 { font-size: clamp(1.9rem, 6vw, 2.6rem); line-height: 1.1; letter-spacing: -.03em; margin: 0 0 10px; }
+  h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); margin: 0 0 24px; font-size: 1.02rem; }
+
+  .search { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--line); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 40px rgba(0,0,0,.25); transition: border-color .2s, box-shadow .2s; }
+  .search:focus-within { border-color: rgba(200,109,215,.7); box-shadow: 0 0 0 4px rgba(200,109,215,.18), 0 10px 40px rgba(0,0,0,.25); }
+  .search svg.link { width: 20px; height: 20px; margin-left: 10px; flex: none; color: var(--muted); }
+  input[type=url] { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text);
+    font: inherit; font-size: 1rem; padding: 10px 4px; }
+  input::placeholder { color: var(--muted); opacity: .8; }
+  button { font: inherit; cursor: pointer; border: 0; color: var(--text); }
+  .ghost { background: transparent; color: var(--muted); padding: 10px 12px; border-radius: 999px; font-size: .92rem; font-weight: 600; }
+  .ghost:hover { color: var(--text); background: var(--line); }
+  .go { background: var(--grad); color: #fff; font-weight: 700; padding: 12px 20px; border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(200,109,215,.45); transition: transform .15s; }
+  .go:active { transform: scale(.96); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 600; color: var(--muted);
+    padding: 5px 11px 5px 7px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+  .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--c, #888); flex: none; display: grid; place-items: center; color: #fff; font-size: .55rem; font-weight: 800; line-height: 1; }
+
+  .card { margin-top: 26px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--line);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: rise .35s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .card-top { height: 4px; background: var(--c, var(--grad)); }
+  .card-body { padding: 18px; }
+  .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: .95rem; }
+  .badge .dot { width: 22px; height: 22px; display: grid; place-items: center; color: #fff; font-size: .7rem; font-weight: 800; }
+  .kind { color: var(--muted); font-weight: 600; }
+  .status { margin-left: auto; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .status.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+  .status.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+  .status.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
+  .note { color: var(--muted); font-size: .92rem; margin: 12px 0 0; }
+  .frame-wrap { display: flex; justify-content: center; margin-top: 16px; }
+  iframe { border: 0; border-radius: 16px; background: var(--card-solid); width: 100%; max-width: 100%; }
+  .links { display: flex; justify-content: center; margin: 16px 0 2px; }
+  .links a { color: var(--text); text-decoration: none; font-weight: 600; font-size: .9rem; padding: 9px 16px;
+    border-radius: 999px; border: 1px solid var(--line); }
+  .links a:hover { background: var(--line); }
+  .loading { display: flex; align-items: center; gap: 12px; color: var(--muted); }
+  .spin { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--g2); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  section.block { margin-top: 34px; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+  h2 button { background: none; color: var(--muted); font-size: .75rem; letter-spacing: .04em; text-transform: none; padding: 0; }
+  h2 button:hover { color: var(--text); }
+  .history { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .history button { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 14px;
+    border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+  .history button:hover { border-color: rgba(200,109,215,.5); }
+  .history .dot { width: 30px; height: 30px; display: grid; place-items: center; color: #fff; font-size: .75rem; font-weight: 800; }
+  .history .t { display: grid; min-width: 0; }
+  .history .t b { font-size: .9rem; }
+  .history .t span { font-size: .78rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  details { border-radius: var(--radius); background: var(--card); border: 1px solid var(--line); padding: 4px 18px; }
+  summary { cursor: pointer; font-weight: 700; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--muted); font-size: 1.2rem; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  .grid { display: grid; gap: 10px; padding-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; font-size: .88rem; }
+  .row .dot { width: 26px; height: 26px; display: grid; place-items: center; color: #fff; font-size: .7rem; font-weight: 800; }
+  .row b { display: block; }
+  .row .y { color: var(--ok); } .row .n { color: var(--muted); }
+  footer { margin-top: 34px; color: var(--muted); font-size: .8rem; text-align: center; line-height: 1.6; }
+
+  @media (max-width: 480px) {
+    .search { border-radius: 22px; flex-wrap: wrap; padding: 8px; }
+    .search input { flex-basis: calc(100% - 40px); }
+    .ghost { flex: 1; background: var(--line); }
+    .go { flex: 2; }
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>Apri Link Social</h1>
-  <p class="sub">Incolla un link ricevuto da Instagram, TikTok, Facebook, X, YouTube, Reddit, Threads e altri: se il contenuto è pubblico lo vedi qui, senza account.</p>
+  <div class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5f6d"/><stop offset=".5" stop-color="#c86dd7"/><stop offset="1" stop-color="#4f7cff"/></linearGradient></defs>
+      <rect width="64" height="64" rx="18" fill="url(#lg)"/>
+      <path d="M10 32c5-9 13-14 22-14s17 5 22 14c-5 9-13 14-22 14S15 41 10 32z" fill="#fff"/>
+      <circle cx="32" cy="32" r="9" fill="#1b1d3a"/><circle cx="35" cy="29" r="3" fill="#fff"/></svg>
+    <b>Social<span>Eye</span></b>
+  </div>
 
-  <form id="f">
-    <input id="u" type="url" inputmode="url" autocomplete="off" placeholder="https://www.instagram.com/reel/…" aria-label="Link da aprire" required>
-    <button type="button" id="paste">Incolla</button>
-    <button class="primary" type="submit">Mostra</button>
+  <h1>Guarda ciò che ti inviano, <em>anche senza account.</em></h1>
+  <p class="sub">Incolla il link di un post, reel o video. Se è pubblico, lo vedi qui.</p>
+
+  <form id="f" class="search">
+    <svg class="link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>
+    <input id="u" type="url" inputmode="url" autocomplete="off" placeholder="Incolla qui il link…" aria-label="Link da aprire" required>
+    <button type="button" class="ghost" id="paste">Incolla</button>
+    <button class="go" type="submit">Mostra</button>
   </form>
+
+  <div class="chips" id="chips"></div>
 
   <div id="out"></div>
 
-  <section class="history" id="historyBox" hidden>
-    <h2>Aperti di recente</h2>
-    <ul id="history"></ul>
-    <button type="button" id="clearHistory" style="margin-top:8px;font-size:.85rem;padding:6px 10px">Cancella cronologia</button>
+  <section class="block" id="historyBox" hidden>
+    <h2>Aperti di recente <button type="button" id="clearHistory">Cancella</button></h2>
+    <ul class="history" id="history"></ul>
   </section>
 
-  <details>
-    <summary>Cosa si può vedere senza account</summary>
-    <table>
-      <thead><tr><th>Social</th><th>Funziona</th><th>Non funziona</th></tr></thead>
-      <tbody>
-        <tr><td>YouTube</td><td>Video, Shorts, playlist</td><td>Video privati o con limite d'età</td></tr>
-        <tr><td>TikTok</td><td>Video, profili pubblici</td><td>Account privati</td></tr>
-        <tr><td>Instagram</td><td>Post, reel, caroselli pubblici; anteprima profili pubblici</td><td>Storie, account privati, scorrere un profilo intero</td></tr>
-        <tr><td>Facebook</td><td>Post, video e reel pubblici; Pagine</td><td>Profili personali, gruppi, contenuti per amici</td></tr>
-        <tr><td>X / Twitter</td><td>Singoli post pubblici</td><td>Profili e risposte (X richiede l'accesso)</td></tr>
-        <tr><td>Threads</td><td>Singoli post pubblici</td><td>Profili</td></tr>
-        <tr><td>Reddit</td><td>Post pubblici</td><td>Subreddit privati o NSFW</td></tr>
-        <tr><td>Altri</td><td>Pinterest, Vimeo, Bluesky, Telegram (canali pubblici), Spotify, LinkedIn (post pubblici), Twitch</td><td>Snapchat, WhatsApp, Facebook Messenger</td></tr>
-      </tbody>
-    </table>
-    <p class="note">L'app usa solo i sistemi ufficiali di incorporamento dei social (gli stessi usati da siti di notizie e blog). Non aggira login, account privati o protezioni: se un social richiede l'accesso, l'app lo dice.</p>
-  </details>
+  <section class="block">
+    <details>
+      <summary>Cosa si può vedere senza account</summary>
+      <div class="grid" id="support"></div>
+      <p class="note" style="margin:0 0 14px">SocialEye usa solo i sistemi ufficiali di incorporamento dei social, gli stessi di siti di notizie e blog. Non aggira login né account privati: se un social richiede l'accesso, te lo dice.</p>
+    </details>
+  </section>
 
-  <footer>La cronologia resta solo in questo browser. Solo i link abbreviati passano dal server dell'app, per trovare l'indirizzo completo.</footer>
+  <footer>La cronologia resta solo su questo dispositivo.<br>Solo i link abbreviati passano dal server dell'app, per trovare l'indirizzo completo.</footer>
 </main>
-
 <script>
 (() => {
   const TIPS_SHORT = "È un link abbreviato: aprilo una volta nel browser, poi copia l'indirizzo completo dalla barra e incollalo qui.";
@@ -300,9 +373,36 @@
   window.parseLink = parseLink;
 
   // ---------- UI ----------
+  const BRAND = {
+    Instagram: ["linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)", "IG"],
+    TikTok: ["linear-gradient(135deg,#25f4ee,#000 45%,#000 55%,#fe2c55)", "TT"],
+    Facebook: ["#1877f2", "f"], YouTube: ["#ff0000", "▶"], X: ["#000", "X"], Threads: ["#101010", "@"],
+    Reddit: ["#ff4500", "r"], Pinterest: ["#e60023", "P"], Vimeo: ["#1ab7ea", "v"], Bluesky: ["#1185fe", "🦋"],
+    Telegram: ["#229ed9", "✈"], Spotify: ["#1db954", "♫"], LinkedIn: ["#0a66c2", "in"], Twitch: ["#9146ff", "T"],
+    Snapchat: ["#fffc00", "👻"], WhatsApp: ["#25d366", "W"],
+  };
+  const dot = (name, cls = "dot") => {
+    const [c, l] = BRAND[name] || ["linear-gradient(120deg,#ff5f6d,#4f7cff)", "?"];
+    return `<span class="${cls}" style="--c:${c};background:${c}">${l}</span>`;
+  };
+  const SUPPORT = [
+    ["Instagram", "Post, reel e caroselli pubblici, anteprima dei profili", "Storie, account privati"],
+    ["TikTok", "Video e profili pubblici", "Account privati"],
+    ["Facebook", "Post, video e reel pubblici, Pagine", "Profili personali, gruppi"],
+    ["YouTube", "Video, Shorts, playlist", "Video privati o con limite d'età"],
+    ["X", "Singoli post pubblici", "Profili e risposte"],
+    ["Threads", "Singoli post pubblici", "Profili"],
+    ["Reddit", "Post pubblici", "Subreddit privati o NSFW"],
+    ["Telegram", "Messaggi di canali pubblici", "Chat e gruppi privati"],
+  ];
+  document.getElementById("chips").innerHTML = ["Instagram", "TikTok", "Facebook", "YouTube", "X", "Threads", "Reddit", "Telegram", "Pinterest", "LinkedIn"]
+    .map((n) => `<span class="chip">${dot(n)}${n}</span>`).join("") + `<span class="chip">+ altri</span>`;
+  document.getElementById("support").innerHTML = SUPPORT.map(([n, y, no]) =>
+    `<div class="row">${dot(n)}<div><b>${n}</b><span class="y">✓ ${y}</span><br><span class="n">✕ ${no}</span></div></div>`).join("")
+    + `<div class="row">${dot("?")}<div><b>Altri</b><span class="y">✓ Pinterest, Vimeo, Bluesky, Spotify, LinkedIn, Twitch</span><br><span class="n">✕ Snapchat, WhatsApp</span></div></div>`;
   const $ = (id) => document.getElementById(id);
   const out = $("out");
-  const STATUS = { ok: "Visibile senza account", warn: "Parzialmente visibile", bad: "Richiede un account" };
+  const STATUS = { ok: "Visibile", warn: "In parte", bad: "Serve un account" };
 
   function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
@@ -326,7 +426,7 @@
   async function show(raw, save = true) {
     const info = parseLink(raw, location.hostname);
     if (info.short) {
-      out.innerHTML = `<div class="card"><p class="note">Sto cercando l'indirizzo completo del link…</p></div>`;
+      out.innerHTML = `<div class="card"><div class="card-top"></div><div class="card-body loading"><span class="spin"></span>Sto aprendo il link condiviso…</div></div>`;
       const full = await resolveShort(info.open);
       if (full && full !== info.open) {
         const again = parseLink(full, location.hostname);
@@ -346,7 +446,9 @@
   }
 
   async function render(info, raw, save) {
-    let html = `<div class="card"><div class="head"><span class="badge">${esc(info.platform)}${info.kind ? " · " + esc(info.kind) : ""}</span>
+    const c = (BRAND[info.platform] || [])[0];
+    let html = `<div class="card"><div class="card-top"${c ? ` style="background:${c}"` : ""}></div><div class="card-body"><div class="head">
+      <span class="badge">${dot(info.platform)}${esc(info.platform)}${info.kind ? ` <span class="kind">· ${esc(info.kind)}</span>` : ""}</span>
       <span class="status ${info.status}">${STATUS[info.status]}</span></div>`;
     if (info.note) html += `<p class="note">${esc(info.note)}</p>`;
     let src = info.embed;
@@ -354,8 +456,8 @@
       try { src = await bskyEmbed(info); } catch { html += `<p class="note">Non sono riuscito a trovare questo account Bluesky.</p>`; }
     }
     if (src) html += frame(src, info);
-    if (info.open) html += `<p class="links"><a href="${esc(info.open)}" target="_blank" rel="noopener noreferrer">Apri il link originale ↗</a></p>`;
-    html += `</div>`;
+    if (info.open) html += `<p class="links"><a href="${esc(info.open)}" target="_blank" rel="noopener noreferrer">Apri nel social ↗</a></p>`;
+    html += `</div></div>`;
     out.innerHTML = html;
     if (save && info.open) remember(info.open, info);
   }
@@ -365,7 +467,7 @@
   function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
   function remember(url, info) {
     try {
-      const list = [{ url, label: `${info.platform}${info.kind ? " · " + info.kind : ""}` }, ...load().filter((x) => x.url !== url)].slice(0, 15);
+      const list = [{ url, platform: info.platform, label: `${info.platform}${info.kind ? " · " + info.kind : ""}` }, ...load().filter((x) => x.url !== url)].slice(0, 15);
       localStorage.setItem(KEY, JSON.stringify(list));
     } catch {}
     renderHistory();
@@ -373,7 +475,8 @@
   function renderHistory() {
     const list = load();
     $("historyBox").hidden = !list.length;
-    $("history").innerHTML = list.map((x, i) => `<li><button type="button" data-i="${i}">${esc(x.label)} — ${esc(x.url)}</button></li>`).join("");
+    $("history").innerHTML = list.map((x, i) => `<li><button type="button" data-i="${i}">${dot(x.platform || x.label.split(" ·")[0])}
+      <span class="t"><b>${esc(x.label)}</b><span>${esc(x.url.replace(/^https?:\/\/(www\.)?/, ""))}</span></span></button></li>`).join("");
   }
   $("history").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-i]"); if (!b) return;
@@ -385,7 +488,7 @@
   $("u").addEventListener("paste", () => setTimeout(() => show($("u").value), 0));
   $("paste").addEventListener("click", async () => {
     try { const t = await navigator.clipboard.readText(); if (t) { $("u").value = t; show(t); } }
-    catch { $("u").focus(); out.innerHTML = `<div class="card"><p class="note">Il browser non permette di leggere gli appunti: tieni premuto nel campo e scegli Incolla.</p></div>`; }
+    catch { $("u").focus(); out.innerHTML = `<div class="card"><div class="card-body"><p class="note" style="margin:0">Il browser non permette di leggere gli appunti: tieni premuto nel campo e scegli Incolla.</p></div></div>`; }
   });
 
   // Support ?url=… (or ?text=…) so the page can be opened directly with a link
@@ -393,6 +496,7 @@
   const pre = q.get("url") || q.get("text") || q.get("u");
   if (pre) { $("u").value = pre; show(pre); }
   renderHistory();
+  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
 </script>
 </body>
