@@ -433,6 +433,9 @@
         if (!again.short) { again.open = full; return render(again, raw, save); }
       }
     }
+    if (info.short) info.note = /github\.io$/.test(location.hostname)
+      ? "Su questo indirizzo i link abbreviati non si possono aprire. Usa la versione di SocialEye su Vercel, che li apre da sola."
+      : "Non sono riuscito a trovare l'indirizzo completo di questo link. Il contenuto potrebbe essere privato o rimosso.";
     return render(info, raw, save);
   }
 
