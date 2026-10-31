@@ -133,7 +133,7 @@
     // TikTok
     if (/(^|\.)tiktok\.com$/.test(h)) {
       if (/^(vm|vt)\.tiktok\.com$/.test(url.hostname) || seg[0] === "t")
-        return r({ platform: "TikTok", status: "warn", note: TIPS_SHORT });
+        return r({ platform: "TikTok", status: "warn", short: true, note: TIPS_SHORT });
       const vi = seg.findIndex((x) => x === "video" || x === "photo");
       if (vi >= 0 && /^\d+$/.test(seg[vi + 1] || ""))
         return r({ platform: "TikTok", kind: seg[vi] === "photo" ? "Foto" : "Video",
@@ -159,7 +159,7 @@
         return r({ platform: "Instagram", kind: "Storia", status: "bad",
           note: "Le storie di Instagram non si possono vedere senza account: Instagram non offre un modo ufficiale per mostrarle." });
       if (seg[0] === "share")
-        return r({ platform: "Instagram", status: "warn", note: TIPS_SHORT });
+        return r({ platform: "Instagram", status: "warn", short: true, note: TIPS_SHORT });
       if (seg.length === 1 && /^[\w.]+$/.test(seg[0]) && !["explore", "accounts", "direct"].includes(seg[0]))
         return r({ platform: "Instagram", kind: "Profilo", status: "warn",
           embed: `https://www.instagram.com/${seg[0]}/embed/`, height: 620, width: 400,
@@ -170,8 +170,7 @@
     // Facebook
     if (/(^|\.)facebook\.com$|^fb\.watch$|^fb\.com$/.test(h)) {
       if (h === "fb.watch" || seg[0] === "share")
-        return r({ platform: "Facebook", status: "warn", embed: `https://www.facebook.com/plugins/post.php?href=${enc(open)}&show_text=true&width=500`,
-          height: 700, width: 500, note: "Link abbreviato: se qui sotto non si vede nulla, aprilo una volta nel browser, copia l'indirizzo completo e incollalo qui." });
+        return r({ platform: "Facebook", status: "warn", short: true, note: TIPS_SHORT });
       const isVideo = seg.includes("videos") || seg[0] === "watch" || seg[0] === "reel" || seg.includes("reel");
       const isPost = isVideo || seg.includes("posts") || seg.includes("photos") || ["permalink.php", "story.php", "photo.php", "photo"].includes(seg[0]);
       if (isVideo)
@@ -194,7 +193,7 @@
 
     // X / Twitter
     if (/^(x|twitter|fxtwitter|vxtwitter|fixupx)\.com$|^t\.co$/.test(h)) {
-      if (h === "t.co") return r({ platform: "X", status: "warn", note: TIPS_SHORT });
+      if (h === "t.co") return r({ platform: "X", status: "warn", short: true, note: TIPS_SHORT });
       const i = seg.indexOf("status");
       if (i >= 0 && /^\d+$/.test(seg[i + 1] || ""))
         return r({ platform: "X", kind: "Post",
@@ -225,14 +224,14 @@
           embed: `https://embed.reddit.com/${sub}comments/${seg[i + 1]}/${seg[i + 2] ? seg[i + 2] + "/" : ""}?embed=true&theme=auto`,
           height: 640, width: 640 });
       }
-      if (seg[2] === "s") return r({ platform: "Reddit", status: "warn", note: TIPS_SHORT });
+      if (seg[2] === "s") return r({ platform: "Reddit", status: "warn", short: true, note: TIPS_SHORT });
       return r({ platform: "Reddit", kind: "Subreddit", status: "warn",
         note: "Reddit non permette di incorporare un subreddit o un profilo intero, ma di solito si vedono senza account aprendo il link originale." });
     }
 
     // Pinterest
     if (/(^|\.)pinterest\.[a-z.]+$|^pin\.it$/.test(h)) {
-      if (h === "pin.it") return r({ platform: "Pinterest", status: "warn", note: TIPS_SHORT });
+      if (h === "pin.it") return r({ platform: "Pinterest", status: "warn", short: true, note: TIPS_SHORT });
       const i = seg.indexOf("pin");
       const id = i >= 0 ? (seg[i + 1] || "").match(/(\d+)$/) : null;
       if (id) return r({ platform: "Pinterest", kind: "Pin",
@@ -326,6 +325,27 @@
 
   async function show(raw, save = true) {
     const info = parseLink(raw, location.hostname);
+    if (info.short) {
+      out.innerHTML = `<div class="card"><p class="note">Sto cercando l'indirizzo completo del link…</p></div>`;
+      const full = await resolveShort(info.open);
+      if (full && full !== info.open) {
+        const again = parseLink(full, location.hostname);
+        if (!again.short) { again.open = full; return render(again, raw, save); }
+      }
+    }
+    return render(info, raw, save);
+  }
+
+  async function resolveShort(link) {
+    try {
+      const res = await fetch(`api/resolve?url=${encodeURIComponent(link)}`, { headers: { accept: "application/json" } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return typeof data.url === "string" ? data.url : null;
+    } catch { return null; }
+  }
+
+  async function render(info, raw, save) {
     let html = `<div class="card"><div class="head"><span class="badge">${esc(info.platform)}${info.kind ? " · " + esc(info.kind) : ""}</span>
       <span class="status ${info.status}">${STATUS[info.status]}</span></div>`;
     if (info.note) html += `<p class="note">${esc(info.note)}</p>`;
