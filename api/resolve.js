@@ -12,14 +12,6 @@ const UA = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, 
 
 const allowed = (u) => u.protocol === "https:" && SHORT_HOSTS.some((re) => re.test(u.hostname));
 
-// A login wall that carries the real destination in ?next= is still a way to learn the public URL.
-function fromLoginWall(u) {
-  if (!/facebook\.com$|instagram\.com$/.test(u.hostname)) return null;
-  if (!/login|checkpoint/.test(u.pathname)) return null;
-  const next = u.searchParams.get("next");
-  try { return next ? new URL(next) : null; } catch { return null; }
-}
-
 function clean(u) {
   if (/facebook\.com$/.test(u.hostname) && /^\/(reel\/\d+|[^/]+\/videos\/\d+|[^/]+\/posts\/[\w]+)/.test(u.pathname)) u.search = "";
   if (/facebook\.com$/.test(u.hostname)) u.hostname = "www.facebook.com";
@@ -36,8 +28,7 @@ function isStillShort(u) {
 async function resolve(start) {
   let u = start;
   for (let hop = 0; hop < 8; hop++) {
-    const wall = fromLoginWall(u);
-    if (wall) u = wall;
+    if (/^\/(login|checkpoint)/.test(u.pathname)) return null; // login wall: stop here
     if (!isStillShort(u)) return clean(u);
     if (!allowed(u)) return null;
     const res = await fetch(u.href, { redirect: "manual", headers: { "user-agent": UA, "accept-language": "it-IT,it;q=0.9" } });
