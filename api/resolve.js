@@ -25,7 +25,30 @@ function isStillShort(u) {
     || /^\/share\//.test(u.pathname) || /\/s\/\w+/.test(u.pathname) || /^\/t\//.test(u.pathname);
 }
 
+// Official Meta oEmbed API (needs a Meta developer app with "oEmbed Read").
+// Set FB_APP_ID and FB_CLIENT_TOKEN in the Vercel project settings to enable it.
+async function viaMetaOembed(u) {
+  const id = process.env.FB_APP_ID, token = process.env.FB_CLIENT_TOKEN;
+  if (!id || !token || !/(facebook\.com|fb\.watch)$/.test(u.hostname)) return null;
+  const isVideo = /^\/share\/(r|v)\//.test(u.pathname) || u.hostname === "fb.watch" || /\/(reel|videos|watch)\b/.test(u.pathname);
+  const kinds = isVideo ? ["oembed_video", "oembed_post"] : ["oembed_post", "oembed_video"];
+  for (const kind of kinds) {
+    const api = `https://graph.facebook.com/v21.0/${kind}?url=${encodeURIComponent(u.href)}&omitscript=true&access_token=${id}|${token}`;
+    const res = await fetch(api);
+    if (!res.ok) continue;
+    const data = await res.json();
+    const m = String(data.html || "").match(/(?:data-href|cite)="([^"]+)"/);
+    if (m) {
+      const full = new URL(m[1].replace(/&amp;/g, "&"));
+      if (!isStillShort(full)) return clean(full);
+    }
+  }
+  return null;
+}
+
 async function resolve(start) {
+  const official = await viaMetaOembed(start).catch(() => null);
+  if (official) return official;
   let u = start;
   for (let hop = 0; hop < 8; hop++) {
     if (/^\/(login|checkpoint)/.test(u.pathname)) return null; // login wall: stop here

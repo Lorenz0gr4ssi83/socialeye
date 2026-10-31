@@ -12,3 +12,12 @@ Web app di una sola pagina: incolli un link ricevuto da un social (Instagram, Ti
 Le app dei social condividono link abbreviati che i sistemi di incorporamento non leggono. La funzione `api/resolve.js` segue i redirect di questi link (solo per un elenco fisso di domini, senza cookie e senza login) e restituisce l'indirizzo completo del contenuto pubblico.
 
 Serve un hosting con funzioni serverless: il progetto è pronto per **Vercel** (piano gratuito). Su vercel.com → *Add New → Project* → importa questo repository → *Deploy*, senza cambiare impostazioni. Su GitHub Pages l'app funziona lo stesso, ma senza espansione dei link abbreviati.
+
+## Link condivisi di Facebook (/share/r/, /share/v/)
+
+Facebook non rivela dove porta un link /share/ a chi non ha fatto l'accesso. Per questi link SocialEye usa l'API oEmbed ufficiale di Meta, che richiede un'app gratuita su developers.facebook.com con la funzione **oEmbed Read**. Nelle impostazioni del progetto Vercel (*Settings → Environment Variables*) aggiungi:
+
+- `FB_APP_ID`: l'ID dell'app Meta
+- `FB_CLIENT_TOKEN`: il token client (*Impostazioni app → Avanzate → Token client*)
+
+Senza queste variabili il resto dell'app funziona, ma i link /share/ di Facebook non si aprono.
