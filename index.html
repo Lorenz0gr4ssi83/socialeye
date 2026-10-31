@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Apri Link Social</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #1d2330; --muted: #5d6677; --line: #e3e6ec;
+    --accent: #3b5bdb; --ok: #2b8a3e; --warn: #b35c00; --bad: #c92a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #12151b; --card: #1b1f27; --text: #e8ebf1; --muted: #9aa3b3; --line: #2b313c;
+      --accent: #7c95f5; --ok: #69db7c; --warn: #ffa94d; --bad: #ff8787; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type=url] { flex: 1 1 320px; min-width: 0; padding: 12px 14px; font-size: 1rem;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--text); }
+  button { padding: 12px 16px; font-size: 1rem; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-top: 20px; }
+  .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .badge { font-size: .8rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
+  .status { font-size: .85rem; font-weight: 600; }
+  .status.ok { color: var(--ok); } .status.warn { color: var(--warn); } .status.bad { color: var(--bad); }
+  .note { color: var(--muted); font-size: .92rem; margin: 6px 0 0; }
+  .frame-wrap { display: flex; justify-content: center; margin-top: 12px; }
+  iframe { border: 0; border-radius: 10px; background: var(--bg); width: 100%; max-width: 100%; }
+  a { color: var(--accent); }
+  .links { margin-top: 12px; font-size: .92rem; }
+  details { margin-top: 28px; }
+  summary { cursor: pointer; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 10px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .history { margin-top: 24px; }
+  .history h2 { font-size: 1rem; margin: 0 0 6px; }
+  .history ul { list-style: none; padding: 0; margin: 0; }
+  .history li button { width: 100%; text-align: left; margin-top: 6px; padding: 8px 12px; font-size: .88rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  footer { margin-top: 36px; color: var(--muted); font-size: .82rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Apri Link Social</h1>
+  <p class="sub">Incolla un link ricevuto da Instagram, TikTok, Facebook, X, YouTube, Reddit, Threads e altri: se il contenuto è pubblico lo vedi qui, senza account.</p>
+
+  <form id="f">
+    <input id="u" type="url" inputmode="url" autocomplete="off" placeholder="https://www.instagram.com/reel/…" aria-label="Link da aprire" required>
+    <button type="button" id="paste">Incolla</button>
+    <button class="primary" type="submit">Mostra</button>
+  </form>
+
+  <div id="out"></div>
+
+  <section class="history" id="historyBox" hidden>
+    <h2>Aperti di recente</h2>
+    <ul id="history"></ul>
+    <button type="button" id="clearHistory" style="margin-top:8px;font-size:.85rem;padding:6px 10px">Cancella cronologia</button>
+  </section>
+
+  <details>
+    <summary>Cosa si può vedere senza account</summary>
+    <table>
+      <thead><tr><th>Social</th><th>Funziona</th><th>Non funziona</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube</td><td>Video, Shorts, playlist</td><td>Video privati o con limite d'età</td></tr>
+        <tr><td>TikTok</td><td>Video, profili pubblici</td><td>Account privati</td></tr>
+        <tr><td>Instagram</td><td>Post, reel, caroselli pubblici; anteprima profili pubblici</td><td>Storie, account privati, scorrere un profilo intero</td></tr>
+        <tr><td>Facebook</td><td>Post, video e reel pubblici; Pagine</td><td>Profili personali, gruppi, contenuti per amici</td></tr>
+        <tr><td>X / Twitter</td><td>Singoli post pubblici</td><td>Profili e risposte (X richiede l'accesso)</td></tr>
+        <tr><td>Threads</td><td>Singoli post pubblici</td><td>Profili</td></tr>
+        <tr><td>Reddit</td><td>Post pubblici</td><td>Subreddit privati o NSFW</td></tr>
+        <tr><td>Altri</td><td>Pinterest, Vimeo, Bluesky, Telegram (canali pubblici), Spotify, LinkedIn (post pubblici), Twitch</td><td>Snapchat, WhatsApp, Facebook Messenger</td></tr>
+      </tbody>
+    </table>
+    <p class="note">L'app usa solo i sistemi ufficiali di incorporamento dei social (gli stessi usati da siti di notizie e blog). Non aggira login, account privati o protezioni: se un social richiede l'accesso, l'app lo dice.</p>
+  </details>
+
+  <footer>Nessun dato viene inviato a server di questa app: la cronologia resta solo in questo browser.</footer>
+</main>
+
+<script>
+(() => {
+  const TIPS_SHORT = "È un link abbreviato: aprilo una volta nel browser, poi copia l'indirizzo completo dalla barra e incollalo qui.";
+
+  function parseUrl(raw) {
+    let s = (raw || "").trim();
+    const m = s.match(/https?:\/\/\S+/i);
+    if (m) s = m[0];
+    else if (/^[\w-]+(\.[\w-]+)+\//.test(s)) s = "https://" + s;
+    try { return new URL(s); } catch { return null; }
+  }
+
+  // Returns { platform, kind, embed, height, width, status: ok|warn|bad, note, open }
+  function parseLink(raw, host) {
+    const url = parseUrl(raw);
+    if (!url) return { platform: "?", status: "bad", note: "Questo non sembra un link valido." };
+    const h = url.hostname.replace(/^(www|m|mobile|mbasic|web|old|new|np)\./, "").toLowerCase();
+    const p = url.pathname.replace(/\/+$/, "");
+    const seg = p.split("/").filter(Boolean);
+    const open = url.href;
+    const r = (o) => Object.assign({ open, status: "ok" }, o);
+    const enc = encodeURIComponent;
+
+    // YouTube
+    if (/(^|\.)youtube\.com$|^youtu\.be$|^youtube-nocookie\.com$/.test(h)) {
+      let id = null, vertical = false;
+      if (h === "youtu.be") id = seg[0];
+      else if (url.searchParams.get("v")) id = url.searchParams.get("v");
+      else if (["shorts", "embed", "live", "v"].includes(seg[0])) { id = seg[1]; vertical = seg[0] === "shorts"; }
+      const list = url.searchParams.get("list");
+      if (id && /^[\w-]{11}$/.test(id)) {
+        const t = parseInt(url.searchParams.get("t") || url.searchParams.get("start") || "0", 10) || 0;
+        return r({ platform: "YouTube", kind: vertical ? "Short" : "Video",
+          embed: `https://www.youtube-nocookie.com/embed/${id}?rel=0${t ? "&start=" + t : ""}`,
+          ratio: vertical ? 16 / 9 : 9 / 16, width: vertical ? 340 : null });
+      }
+      if (list) return r({ platform: "YouTube", kind: "Playlist",
+        embed: `https://www.youtube-nocookie.com/embed/videoseries?list=${enc(list)}`, ratio: 9 / 16 });
+      return r({ platform: "YouTube", kind: "Canale", status: "warn",
+        note: "YouTube non permette di incorporare un canale intero. I canali sono comunque visibili senza account: apri il link originale. Per un singolo video incolla il suo link." });
+    }
+
+    // TikTok
+    if (/(^|\.)tiktok\.com$/.test(h)) {
+      if (/^(vm|vt)\.tiktok\.com$/.test(url.hostname) || seg[0] === "t")
+        return r({ platform: "TikTok", status: "warn", note: TIPS_SHORT });
+      const vi = seg.findIndex((x) => x === "video" || x === "photo");
+      if (vi >= 0 && /^\d+$/.test(seg[vi + 1] || ""))
+        return r({ platform: "TikTok", kind: seg[vi] === "photo" ? "Foto" : "Video",
+          embed: `https://www.tiktok.com/embed/v2/${seg[vi + 1]}?lang=it-IT`, height: 760, width: 340 });
+      if (seg[0] && seg[0].startsWith("@"))
+        return r({ platform: "TikTok", kind: "Profilo",
+          embed: `https://www.tiktok.com/embed/@${enc(seg[0].slice(1))}?lang=it-IT`, height: 560, width: 380,
+          note: "Anteprima ufficiale del profilo con gli ultimi video. Gli account privati non sono visibili." });
+      return r({ platform: "TikTok", status: "bad", note: "Link TikTok non riconosciuto. Incolla il link di un video o di un profilo." });
+    }
+
+    // Instagram
+    if (/(^|\.)instagram\.com$|^instagr\.am$/.test(h)) {
+      const i = seg.findIndex((x) => ["p", "reel", "reels", "tv"].includes(x));
+      if (i >= 0 && seg[i + 1]) {
+        const kind = seg[i].startsWith("reel") ? "Reel" : seg[i] === "tv" ? "Video" : "Post";
+        return r({ platform: "Instagram", kind,
+          embed: `https://www.instagram.com/${seg[i] === "reels" ? "reel" : seg[i]}/${seg[i + 1]}/embed/captioned/`,
+          height: 820, width: 400,
+          note: "Se compare \"contenuto non disponibile\" il post è privato, è stato rimosso o l'autore ha disattivato l'incorporamento." });
+      }
+      if (seg[0] === "stories" || seg[0] === "s")
+        return r({ platform: "Instagram", kind: "Storia", status: "bad",
+          note: "Le storie di Instagram non si possono vedere senza account: Instagram non offre un modo ufficiale per mostrarle." });
+      if (seg[0] === "share")
+        return r({ platform: "Instagram", status: "warn", note: TIPS_SHORT });
+      if (seg.length === 1 && /^[\w.]+$/.test(seg[0]) && !["explore", "accounts", "direct"].includes(seg[0]))
+        return r({ platform: "Instagram", kind: "Profilo", status: "warn",
+          embed: `https://www.instagram.com/${seg[0]}/embed/`, height: 620, width: 400,
+          note: "Anteprima del profilo pubblico. Per vedere tutti i post Instagram chiede di accedere: qui si vedono solo l'intestazione e gli ultimi contenuti, quando Instagram li mostra." });
+      return r({ platform: "Instagram", status: "bad", note: "Questo tipo di link Instagram richiede l'accesso." });
+    }
+
+    // Facebook
+    if (/(^|\.)facebook\.com$|^fb\.watch$|^fb\.com$/.test(h)) {
+      if (h === "fb.watch" || seg[0] === "share")
+        return r({ platform: "Facebook", status: "warn", embed: `https://www.facebook.com/plugins/post.php?href=${enc(open)}&show_text=true&width=500`,
+          height: 700, width: 500, note: "Link abbreviato: se qui sotto non si vede nulla, aprilo una volta nel browser, copia l'indirizzo completo e incollalo qui." });
+      const isVideo = seg.includes("videos") || seg[0] === "watch" || seg[0] === "reel" || seg.includes("reel");
+      const isPost = isVideo || seg.includes("posts") || seg.includes("photos") || ["permalink.php", "story.php", "photo.php", "photo"].includes(seg[0]);
+      if (isVideo)
+        return r({ platform: "Facebook", kind: seg.includes("reel") ? "Reel" : "Video",
+          embed: `https://www.facebook.com/plugins/video.php?href=${enc(open)}&show_text=true&width=500`, height: 760, width: 500,
+          note: "Funziona solo se il video è pubblico." });
+      if (isPost)
+        return r({ platform: "Facebook", kind: "Post",
+          embed: `https://www.facebook.com/plugins/post.php?href=${enc(open)}&show_text=true&width=500`, height: 720, width: 500,
+          note: "Funziona solo se il post è pubblico. I post di profili personali condivisi con gli amici non si vedono." });
+      if (seg[0] === "groups")
+        return r({ platform: "Facebook", kind: "Gruppo", status: "bad", note: "I gruppi Facebook non si possono vedere senza account." });
+      if (seg.length >= 1 && seg[0] !== "profile.php")
+        return r({ platform: "Facebook", kind: "Pagina", status: "warn",
+          embed: `https://www.facebook.com/plugins/page.php?href=${enc(open)}&tabs=timeline&width=500&height=700&small_header=false`,
+          height: 700, width: 500,
+          note: "Funziona per le Pagine pubbliche (aziende, personaggi, giornali). I profili personali non si possono incorporare." });
+      return r({ platform: "Facebook", kind: "Profilo", status: "bad", note: "I profili personali di Facebook non si possono vedere senza account." });
+    }
+
+    // X / Twitter
+    if (/^(x|twitter|fxtwitter|vxtwitter|fixupx)\.com$|^t\.co$/.test(h)) {
+      if (h === "t.co") return r({ platform: "X", status: "warn", note: TIPS_SHORT });
+      const i = seg.indexOf("status");
+      if (i >= 0 && /^\d+$/.test(seg[i + 1] || ""))
+        return r({ platform: "X", kind: "Post",
+          embed: `https://platform.twitter.com/embed/Tweet.html?id=${seg[i + 1]}&dnt=true&lang=it`, height: 700, width: 550,
+          note: "Si vede il singolo post. Risposte e conversazione completa richiedono l'accesso a X." });
+      return r({ platform: "X", kind: "Profilo", status: "bad",
+        note: "Da metà 2023 X richiede l'accesso per scorrere i profili, e il widget ufficiale dei profili non funziona più. Si possono vedere solo i singoli post: incolla il link di un post." });
+    }
+
+    // Threads
+    if (/^threads\.(net|com)$/.test(h)) {
+      const i = seg.indexOf("post");
+      if (i > 0 && seg[i + 1])
+        return r({ platform: "Threads", kind: "Post",
+          embed: `https://www.threads.com/${seg[0]}/post/${seg[i + 1]}/embed`, height: 640, width: 500 });
+      return r({ platform: "Threads", kind: "Profilo", status: "warn",
+        note: "Threads non offre un modo ufficiale per incorporare un profilo. Prova ad aprire il link originale: Threads spesso mostra i profili pubblici anche senza account." });
+    }
+
+    // Reddit
+    if (/(^|\.)reddit\.com$|^redd\.it$/.test(h)) {
+      if (h === "redd.it" && seg[0]) return r({ platform: "Reddit", kind: "Post",
+        embed: `https://embed.reddit.com/comments/${seg[0]}/?embed=true&theme=auto`, height: 640, width: 640 });
+      const i = seg.indexOf("comments");
+      if (i >= 0 && seg[i + 1]) {
+        const sub = seg[0] === "r" ? `r/${seg[1]}/` : "";
+        return r({ platform: "Reddit", kind: "Post",
+          embed: `https://embed.reddit.com/${sub}comments/${seg[i + 1]}/${seg[i + 2] ? seg[i + 2] + "/" : ""}?embed=true&theme=auto`,
+          height: 640, width: 640 });
+      }
+      if (seg[2] === "s") return r({ platform: "Reddit", status: "warn", note: TIPS_SHORT });
+      return r({ platform: "Reddit", kind: "Subreddit", status: "warn",
+        note: "Reddit non permette di incorporare un subreddit o un profilo intero, ma di solito si vedono senza account aprendo il link originale." });
+    }
+
+    // Pinterest
+    if (/(^|\.)pinterest\.[a-z.]+$|^pin\.it$/.test(h)) {
+      if (h === "pin.it") return r({ platform: "Pinterest", status: "warn", note: TIPS_SHORT });
+      const i = seg.indexOf("pin");
+      const id = i >= 0 ? (seg[i + 1] || "").match(/(\d+)$/) : null;
+      if (id) return r({ platform: "Pinterest", kind: "Pin",
+        embed: `https://assets.pinterest.com/ext/embed.html?id=${id[1]}`, height: 620, width: 345 });
+      return r({ platform: "Pinterest", status: "warn", note: "Incolla il link di un singolo Pin." });
+    }
+
+    // Vimeo
+    if (/(^|\.)vimeo\.com$/.test(h)) {
+      const id = seg.find((x) => /^\d+$/.test(x));
+      if (id) return r({ platform: "Vimeo", kind: "Video", embed: `https://player.vimeo.com/video/${id}?dnt=1`, ratio: 9 / 16 });
+    }
+
+    // Bluesky (needs handle → DID lookup, done async)
+    if (h === "bsky.app" && seg[0] === "profile" && seg[2] === "post" && seg[3])
+      return r({ platform: "Bluesky", kind: "Post", bsky: { actor: seg[1], rkey: seg[3] }, height: 600, width: 550 });
+
+    // Telegram public channels
+    if (/^(t\.me|telegram\.me)$/.test(h) && seg.length >= 2 && /^\d+$/.test(seg[seg.length - 1])) {
+      const ch = seg[0] === "s" ? seg[1] : seg[0];
+      return r({ platform: "Telegram", kind: "Messaggio di canale",
+        embed: `https://t.me/${ch}/${seg[seg.length - 1]}?embed=1&mode=tme`, height: 560, width: 500,
+        note: "Funziona solo per i canali pubblici." });
+    }
+
+    // Spotify
+    if (h === "open.spotify.com") {
+      const t = seg.findIndex((x) => ["track", "album", "playlist", "episode", "show", "artist"].includes(x));
+      if (t >= 0 && seg[t + 1]) return r({ platform: "Spotify", kind: seg[t],
+        embed: `https://open.spotify.com/embed/${seg[t]}/${seg[t + 1]}`, height: ["track", "episode"].includes(seg[t]) ? 232 : 452 });
+    }
+
+    // LinkedIn
+    if (/(^|\.)linkedin\.com$/.test(h)) {
+      const urn = decodeURIComponent(p).match(/urn:li:(activity|share|ugcPost):\d+/);
+      const act = p.match(/activity-(\d{10,})/);
+      const id = urn ? urn[0] : act ? `urn:li:activity:${act[1]}` : null;
+      if (id) return r({ platform: "LinkedIn", kind: "Post",
+        embed: `https://www.linkedin.com/embed/feed/update/${id}`, height: 680, width: 504,
+        note: "Funziona solo per i post pubblici." });
+      return r({ platform: "LinkedIn", status: "bad", note: "I profili LinkedIn richiedono l'accesso. Si possono vedere solo i post pubblici: incolla il link di un post." });
+    }
+
+    // Twitch (needs parent = the domain hosting this page)
+    if (/(^|\.)twitch\.tv$/.test(h)) {
+      const parent = host || "localhost";
+      if (h === "clips.twitch.tv" || seg[1] === "clip") {
+        const clip = h === "clips.twitch.tv" ? seg[0] : seg[2];
+        return r({ platform: "Twitch", kind: "Clip", embed: `https://clips.twitch.tv/embed?clip=${enc(clip)}&parent=${parent}`, ratio: 9 / 16 });
+      }
+      if (seg[0] === "videos" && seg[1]) return r({ platform: "Twitch", kind: "Video",
+        embed: `https://player.twitch.tv/?video=${seg[1]}&parent=${parent}&autoplay=false`, ratio: 9 / 16 });
+      if (seg[0]) return r({ platform: "Twitch", kind: "Canale",
+        embed: `https://player.twitch.tv/?channel=${enc(seg[0])}&parent=${parent}&autoplay=false`, ratio: 9 / 16 });
+    }
+
+    if (/(^|\.)snapchat\.com$/.test(h))
+      return r({ platform: "Snapchat", status: "warn", note: "Snapchat non offre un incorporamento affidabile. Gli Spotlight e i profili pubblici spesso si aprono nel browser senza account: usa il link originale." });
+
+    if (/(^|\.)whatsapp\.com$|^wa\.me$/.test(h))
+      return r({ platform: "WhatsApp", status: "bad", note: "I contenuti WhatsApp sono privati e non si possono vedere fuori dall'app." });
+
+    return r({ platform: url.hostname, status: "warn", note: "Questo sito non è tra quelli supportati. Puoi comunque aprire il link originale." });
+  }
+
+  window.parseLink = parseLink;
+
+  // ---------- UI ----------
+  const $ = (id) => document.getElementById(id);
+  const out = $("out");
+  const STATUS = { ok: "Visibile senza account", warn: "Parzialmente visibile", bad: "Richiede un account" };
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+  function frame(src, info) {
+    const size = info.ratio ? `aspect-ratio:1/${info.ratio.toFixed(4)};height:auto` : `height:${info.height || 600}px`;
+    return `<div class="frame-wrap"><iframe src="${esc(src)}" style="max-width:${info.width ? info.width + "px" : "100%"};${size}"
+      loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
+      allowfullscreen referrerpolicy="strict-origin-when-cross-origin" title="${esc(info.platform)}"></iframe></div>`;
+  }
+
+  async function bskyEmbed(info) {
+    let did = info.bsky.actor;
+    if (!did.startsWith("did:")) {
+      const res = await fetch(`https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(did)}`);
+      if (!res.ok) throw new Error("handle");
+      did = (await res.json()).did;
+    }
+    return `https://embed.bsky.app/embed/${did}/app.bsky.feed.post/${info.bsky.rkey}`;
+  }
+
+  async function show(raw, save = true) {
+    const info = parseLink(raw, location.hostname);
+    let html = `<div class="card"><div class="head"><span class="badge">${esc(info.platform)}${info.kind ? " · " + esc(info.kind) : ""}</span>
+      <span class="status ${info.status}">${STATUS[info.status]}</span></div>`;
+    if (info.note) html += `<p class="note">${esc(info.note)}</p>`;
+    let src = info.embed;
+    if (info.bsky) {
+      try { src = await bskyEmbed(info); } catch { html += `<p class="note">Non sono riuscito a trovare questo account Bluesky.</p>`; }
+    }
+    if (src) html += frame(src, info);
+    if (info.open) html += `<p class="links"><a href="${esc(info.open)}" target="_blank" rel="noopener noreferrer">Apri il link originale ↗</a></p>`;
+    html += `</div>`;
+    out.innerHTML = html;
+    if (save && info.open) remember(info.open, info);
+  }
+
+  // History (local only)
+  const KEY = "apri-link-social-history";
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+  function remember(url, info) {
+    try {
+      const list = [{ url, label: `${info.platform}${info.kind ? " · " + info.kind : ""}` }, ...load().filter((x) => x.url !== url)].slice(0, 15);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    } catch {}
+    renderHistory();
+  }
+  function renderHistory() {
+    const list = load();
+    $("historyBox").hidden = !list.length;
+    $("history").innerHTML = list.map((x, i) => `<li><button type="button" data-i="${i}">${esc(x.label)} — ${esc(x.url)}</button></li>`).join("");
+  }
+  $("history").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-i]"); if (!b) return;
+    const item = load()[+b.dataset.i]; $("u").value = item.url; show(item.url, false);
+  });
+  $("clearHistory").addEventListener("click", () => { try { localStorage.removeItem(KEY); } catch {} renderHistory(); });
+
+  $("f").addEventListener("submit", (e) => { e.preventDefault(); show($("u").value); });
+  $("u").addEventListener("paste", () => setTimeout(() => show($("u").value), 0));
+  $("paste").addEventListener("click", async () => {
+    try { const t = await navigator.clipboard.readText(); if (t) { $("u").value = t; show(t); } }
+    catch { $("u").focus(); out.innerHTML = `<div class="card"><p class="note">Il browser non permette di leggere gli appunti: tieni premuto nel campo e scegli Incolla.</p></div>`; }
+  });
+
+  // Support ?url=… (or ?text=…) so the page can be opened directly with a link
+  const q = new URLSearchParams(location.search);
+  const pre = q.get("url") || q.get("text") || q.get("u");
+  if (pre) { $("u").value = pre; show(pre); }
+  renderHistory();
+})();
+</script>
+</body>
+</html>
