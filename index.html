@@ -247,7 +247,11 @@ if (/github\.io$/.test(location.hostname)) location.replace("https://socialeye-6
     // Facebook
     if (/(^|\.)facebook\.com$|^fb\.watch$|^fb\.com$/.test(h)) {
       if (h === "fb.watch" || seg[0] === "share")
-        return r({ platform: "Facebook", status: "warn", short: true, note: TIPS_SHORT });
+        return r({ platform: "Facebook", kind: /\/share\/p\//.test(p) ? "Post" : "Video", status: "warn", short: true,
+          fallback: /\/share\/p\//.test(p)
+            ? `https://www.facebook.com/plugins/post.php?href=${enc(open)}&show_text=true&width=500`
+            : `https://www.facebook.com/plugins/video.php?href=${enc(open)}&show_text=true&width=500`,
+          height: 760, width: 500, note: TIPS_SHORT });
       const isVideo = seg.includes("videos") || seg[0] === "watch" || seg[0] === "reel" || seg.includes("reel");
       const isPost = isVideo || seg.includes("posts") || seg.includes("photos") || ["permalink.php", "story.php", "photo.php", "photo"].includes(seg[0]);
       if (isVideo)
@@ -436,6 +440,12 @@ if (/github\.io$/.test(location.hostname)) location.replace("https://socialeye-6
         const again = parseLink(full, location.hostname);
         if (!again.short) { again.open = full; return render(again, raw, save); }
       }
+    }
+    if (info.fallback) {
+      // Last try: hand the shared link straight to Facebook's official player.
+      info.embed = info.fallback;
+      info.note = "Provo ad aprirlo con il lettore ufficiale di Facebook. Se resta vuoto o dà errore, Facebook non permette di vedere questo link senza account.";
+      return render(info, raw, save);
     }
     if (info.short) info.note = /github\.io$/.test(location.hostname)
       ? "Su questo indirizzo i link abbreviati non si possono aprire. Usa socialeye-63lg.vercel.app, che li apre da sola."
